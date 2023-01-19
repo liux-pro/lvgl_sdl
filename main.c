@@ -1,4 +1,7 @@
 #include <SDL.h>
+#include <demos/widgets/lv_demo_widgets.h>
+#include <examples/widgets/lv_example_widgets.h>
+#include "config.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -6,9 +9,8 @@
 
 
 #include "stdbool.h"
+#include "lv_port_disp.h"
 
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 240
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -26,15 +28,15 @@ void loop() {
             break;
         }
     }
+}
 
-
+void update_screen(uint8_t *buf) {
     if (SDL_MUSTLOCK(surface)) SDL_LockSurface(surface);
 
     Uint8 *pixels = (Uint8 *) (surface->pixels);
 
 // do frame
-    uint8_t a[SCREEN_WIDTH * SCREEN_HEIGHT * 2]={0};
-    memcpy(pixels, a, SCREEN_WIDTH * SCREEN_HEIGHT * 2);
+    memcpy(pixels, buf, SCREEN_WIDTH * SCREEN_HEIGHT * 2);
 
     if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface);
 
@@ -46,9 +48,9 @@ void loop() {
 }
 
 void sdl_simple_init() {
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_CreateWindowAndRenderer(SCREEN_WIDTH * 3, SCREEN_HEIGHT * 3, SDL_WINDOW_RESIZABLE,
+    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE,
                                 &window, &renderer);
 
     //flag 和 depth 实际上没用，并且它们会在sdl3中被删除
@@ -61,10 +63,22 @@ void sdl_simple_init() {
                                 SCREEN_HEIGHT);
 }
 
+Uint32 lvglHeartbeat(Uint32 interval, void *param) {
+    lv_tick_inc(1);
+    return interval;
+}
+
+Uint32 start_time;
+const int TARGET_FPS = 60;
+const int FRAME_TIME = 1000 / TARGET_FPS;
+
 int main(int argc, char *argv[]) {
     sdl_simple_init();
-
-
+    SDL_AddTimer(1, lvglHeartbeat, NULL);
+    lv_init();
+    lv_port_disp_init();
+//    lv_demo_stress();
+    lv_demo_benchmark();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(loop, 0, 1);
@@ -73,8 +87,12 @@ int main(int argc, char *argv[]) {
 #ifndef __EMSCRIPTEN__
     // repeatedly calling mainloop on desktop
     while (!quit) {
+        start_time = SDL_GetTicks();
+        lv_timer_handler();
         loop();
-        SDL_Delay(16);
+        Uint32 frame_time = SDL_GetTicks() - start_time;
+        if (frame_time < FRAME_TIME)
+            SDL_Delay(FRAME_TIME - frame_time);
     };
 #endif
 
