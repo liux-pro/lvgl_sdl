@@ -28,6 +28,7 @@ void loop() {
             break;
         }
     }
+    lv_timer_handler();
 }
 
 void update_screen(uint8_t *buf) {
@@ -84,14 +85,13 @@ int main(int argc, char *argv[]) {
 
 
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(loop, 0, 1);
+    emscripten_set_main_loop(loop, -1, 1);
 #endif
 
 #ifndef __EMSCRIPTEN__
     // repeatedly calling mainloop on desktop
     while (!quit) {
         start_time = SDL_GetTicks();
-        lv_timer_handler();
         loop();
         Uint32 frame_time = SDL_GetTicks() - start_time;
         if (frame_time < FRAME_TIME)

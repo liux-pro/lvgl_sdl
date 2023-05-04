@@ -20,9 +20,9 @@ set(LV_CONF_PATH
         CACHE STRING "" FORCE)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sUSE_SDL=2 --shell-file ${CMAKE_SOURCE_DIR}/shell_minimal.html")
-    #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sUSE_SDL=2 --shell-file ${CMAKE_SOURCE_DIR}/shell_minimal.html")
-    #    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sUSE_SDL=2 --shell-file ${CMAKE_SOURCE_DIR}/shell_minimal.html")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sUSE_SDL=2 --shell-file ${CMAKE_SOURCE_DIR}/shell_minimal.html")
+        set(CMAKE_EXECUTABLE_SUFFIX ".html")
 else ()
     find_package(SDL2 REQUIRED)
     include_directories(${SDL2_INCLUDE_DIRS})
