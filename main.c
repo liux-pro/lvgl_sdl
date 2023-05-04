@@ -78,7 +78,10 @@ int main(int argc, char *argv[]) {
     lv_init();
     lv_port_disp_init();
 //    lv_demo_stress();
-    lv_demo_benchmark();
+//    lv_demo_benchmark();
+//    lv_demo_widgets();
+    lv_demo_music();
+
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(loop, 0, 1);
